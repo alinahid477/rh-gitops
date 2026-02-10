@@ -1,0 +1,100 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: bootc-test
+  namespace: myvms1
+  finalizers:
+    - kubevirt.io/virtualMachineControllerFinalize
+spec:
+  dataVolumeTemplates:
+    - metadata:
+        name: bootc-test
+      spec:
+        source:
+          registry:
+            # imageStream: my-golden-rhel9:9.4.1
+            # pullMethod: node
+            url: "docker://quay.io/alitestseverything/my-rh9-bootc:{{values.imagetag}}"
+            # # url: "docker://metalsno-registry.apps.metalsno.home.alishomelab.site/openshift-virtualization-os-images/my-golden-rhel9:9.4.1"
+            # # pullMethod: node
+            secretRef: mini-quay-registry-secret 
+            # certConfigMap: tls-certs 
+        storage:
+          resources:
+            requests:
+              storage: 15Gi
+  # instancetype:
+  #   kind: virtualmachineclusterinstancetype
+  #   name: u1.medium
+  # preference:
+  #   kind: virtualmachineclusterpreference
+  #   name: rhel.9
+  running: true
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: medium
+        vm.kubevirt.io/os: rhel.9
+        vm.kubevirt.io/workload: server
+      creationTimestamp: null
+      labels:
+        network.kubevirt.io/headlessService: headless
+        kubevirt.io/domain: bootc-test
+        kubevirt.io/size: medium
+    spec:
+      accessCredentials:
+        - sshPublicKey:
+            propagationMethod:
+              noCloud: {}
+            source:
+              secret:
+                secretName: common-vm-ssh-key
+      architecture: amd64
+      domain:
+        cpu:
+          cores: 2
+          sockets: 1
+          threads: 1
+        memory:
+          guest: 8Gi
+        devices:
+          disks:
+            - disk:
+                bus: virtio
+              name: rootdisk
+            - disk:
+                bus: virtio
+              name: cloudinitdisk
+          interfaces:
+            - masquerade: {}
+              model: virtio
+              name: default
+        features:
+          acpi: {}
+          smm:
+            enabled: true
+        firmware:
+          bootloader:
+            efi: {}
+        machine:
+          type: q35
+        resources: {}
+      networks:
+        - name: default
+          pod: {}
+      terminationGracePeriodSeconds: 180
+      volumes:
+        - dataVolume:
+            name: bootc-test
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |
+              #cloud-config
+              chpasswd:
+                expire: false
+              password: 1234
+              user: cloud-user
+          name: cloudinitdisk
+
+#runcmd:
+# - [ subscription-manager, register, --activationkey=activation-key-default-8j0527, --org=18358794 ]
