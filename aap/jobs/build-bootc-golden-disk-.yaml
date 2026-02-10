@@ -13,4 +13,4 @@ spec:
     ubi: ubi9
     ubiversion: 9.4
     imageversion: hw1
-    appconfig: Hello World
+    appconfig: Hello world
