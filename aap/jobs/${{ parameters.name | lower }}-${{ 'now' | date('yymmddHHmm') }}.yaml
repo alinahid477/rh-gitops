@@ -1,0 +1,14 @@
+apiVersion: tower.ansible.com/v1alpha1
+kind: AnsibleJob
+metadata:
+  name: ${{ parameters.name | lower }}-${{ 'now' | date('yymmddHHmm') }}-job
+  namespace: aap
+spec:
+  # tower_auth_secret: my-toweraccess
+  job_template_name: Build-BootC-Golden-Disk
+  organization_name: "myorg"
+  extra_vars:
+    ubi: ubi9
+    ubiversion: 9.4
+    imageversion: ha1
+    appconfig: Hello Ali
