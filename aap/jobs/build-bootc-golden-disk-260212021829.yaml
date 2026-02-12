@@ -1,0 +1,15 @@
+apiVersion: tower.ansible.com/v1alpha1
+kind: AnsibleJob
+metadata:
+  name: build-bootc-golden-disk-260212021829-job
+  namespace: aap
+spec:
+  # tower_auth_secret: my-toweraccess
+  tower_auth_secret: aap-access-details # This points to the secret above
+  job_template_name: Build-BootC-Golden-Disk
+  organization_name: "myorg"
+  extra_vars:
+    ubi: ubi9
+    ubiversion: 9.4
+    imageversion: hb1
+    appconfig: Hello Bootc
