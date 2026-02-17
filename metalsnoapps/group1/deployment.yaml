@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secret-reader-deployment
+  # This will be deployed into 'group1' via your AppSet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secret-reader
+  template:
+    metadata:
+      labels:
+        app: secret-reader
+    spec:
+      imagePullSecrets:
+        - name: mirror-registry-creds
+      containers:
+      - name: secret-reader
+        image: mirror-registry.alishomelab.xyz:8443/docker/secretreader:v1
+        imagePullPolicy: Always
+        env:
+          - name: USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mysecret-for-secret-reader
+                key: username # Assumes your secret has a 'username' key
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysecret-for-secret-reader
+                key: password # Assumes your secret has a 'password' key
